@@ -1,6 +1,5 @@
 import pandas as pd
-import datetime
-import re
+import datetime, re
 from calendar import monthrange
 
 class CalculateProductivity:
