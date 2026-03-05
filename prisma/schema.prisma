@@ -1,0 +1,125 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── EMPLOYEE DATA (from HR API) ──────────────────────
+
+model Employee {
+  id           String   @id @default(uuid())
+  employeeHrId String   @unique
+  name         String
+  lastName     String
+  email        String   @unique
+  salary       Float
+  category     String
+  position     String?
+  state        String
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  divisionId   String?
+  division     Division?   @relation(fields: [divisionId], references: [id])
+  management   String?
+  excluded     Boolean  @default(false)
+  dailyMetrics DailyMetric[]
+  dailyScores  DailyScore[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+  @@index([departmentId])
+  @@index([divisionId])
+  @@index([state])
+}
+
+model Department {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  employees Employee[]
+  createdAt DateTime   @default(now())
+}
+
+model Division {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  employees Employee[]
+  createdAt DateTime   @default(now())
+}
+
+// ─── RAW DAILY METRICS (from Google Admin Reports API) ─
+
+model DailyMetric {
+  id               String   @id @default(uuid())
+  employeeId       String
+  employee         Employee @relation(fields: [employeeId], references: [id])
+  date             DateTime
+  emailsSent       Int      @default(0)
+  lastLoginTime    DateTime?
+  filesEdited      Int      @default(0)
+  filesViewed      Int      @default(0)
+  filesCreated     Int      @default(0)
+  meetingCount     Int      @default(0)
+  meetingMinutes   Int      @default(0)
+  chatMessagesSent Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
+
+// ─── CALCULATED DAILY SCORES ──────────────────────────
+
+model DailyScore {
+  id             String   @id @default(uuid())
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  date           DateTime
+  emailActive    Int
+  driveActive    Int
+  chatActive     Int
+  meetingsActive Int
+  totalScore     Float
+  coefficientSet String
+  createdAt      DateTime @default(now())
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
+
+// ─── CONFIGURABLE SCORE COEFFICIENTS ──────────────────
+
+model CoefficientSet {
+  id             String   @id @default(uuid())
+  name           String   @unique
+  emailWeight    Float
+  emailLastUse   Float
+  filesEdited    Float
+  filesViewed    Float
+  driveLastUse   Float
+  filesCreated   Float
+  chatWeight     Float
+  meetingsWeight Float
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ─── SYNC AUDIT LOG ───────────────────────────────────
+
+model SyncLog {
+  id            String   @id @default(uuid())
+  jobType       String
+  status        String
+  recordsCount  Int      @default(0)
+  dateRangeFrom DateTime?
+  dateRangeTo   DateTime?
+  errorMessage  String?
+  durationMs    Int?
+  createdAt     DateTime @default(now())
+
+  @@index([jobType, createdAt])
+}
