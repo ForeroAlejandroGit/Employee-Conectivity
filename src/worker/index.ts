@@ -3,6 +3,7 @@ import { runHrSync } from './jobs/sync-hr';
 import { runGoogleSync } from './jobs/sync-google';
 import { runChatMeetingsSync } from './jobs/sync-chat-meetings';
 import { runGeminiSync } from './jobs/sync-gemini';
+import { calculateScoresForDate } from '../lib/score-calculator';
 
 /**
  * Worker process — runs independently from Next.js.
@@ -13,11 +14,9 @@ import { runGeminiSync } from './jobs/sync-gemini';
  * Schedule: Daily at 02:00 AM local time.
  *
  * Pipeline order:
- *   1. HR Sync          — refresh the employee roster first
- *   2. Google Sync       — fetch email/drive metrics (User Usage Reports)
- *   3. Chat/Meet Sync   — fetch chat & meeting activity (Activity Reports)
- *   4. Gemini Sync      — fetch Gemini usage activity (Activity Reports)
- *   5. Score calculation — runs inside steps 2, 3 & 4 per date
+ *   1. HR Sync                    — refresh the employee roster first
+ *   2-4. Google + Chat/Meet + Gemini — run in PARALLEL (different DB columns)
+ *   5. Score calculation           — runs ONCE after all 3 syncs finish
  */
 
 async function runFullPipeline() {
@@ -32,22 +31,42 @@ async function runFullPipeline() {
     console.error('[Worker] HR sync failed — continuing to Google sync');
   }
 
-  try {
-    await runGoogleSync();
-  } catch (e) {
-    console.error('[Worker] Google sync (email/drive) failed');
-  }
+  // Run the 3 Google API syncs in parallel — they write to different columns
+  // of DailyMetric so there are no data conflicts between them.
+  console.log('\n[Worker] Starting Google, Chat/Meet and Gemini syncs in parallel…');
+  const [googleResult, chatMeetResult, geminiResult] = await Promise.allSettled([
+    runGoogleSync(),
+    runChatMeetingsSync(),
+    runGeminiSync(),
+  ]);
 
-  try {
-    await runChatMeetingsSync();
-  } catch (e) {
-    console.error('[Worker] Chat/Meet sync failed');
-  }
+  if (googleResult.status === 'rejected')
+    console.error('[Worker] Google sync (email/drive) failed:', googleResult.reason);
+  if (chatMeetResult.status === 'rejected')
+    console.error('[Worker] Chat/Meet sync failed:', chatMeetResult.reason);
+  if (geminiResult.status === 'rejected')
+    console.error('[Worker] Gemini sync failed:', geminiResult.reason);
 
-  try {
-    await runGeminiSync();
-  } catch (e) {
-    console.error('[Worker] Gemini sync failed');
+  // Collect all unique dates from all 3 jobs and recalculate scores ONCE per date.
+  // Running scores here (after all jobs finish) ensures every score reflects the
+  // complete metric record — email + drive + chat + meetings + gemini all written.
+  const allDates = new Set<string>();
+  if (googleResult.status === 'fulfilled' && googleResult.value)
+    googleResult.value.datesProcessed.forEach((d) => allDates.add(d));
+  if (chatMeetResult.status === 'fulfilled' && chatMeetResult.value)
+    chatMeetResult.value.datesProcessed.forEach((d) => allDates.add(d));
+  if (geminiResult.status === 'fulfilled' && geminiResult.value)
+    geminiResult.value.datesProcessed.forEach((d) => allDates.add(d));
+
+  if (allDates.size > 0) {
+    console.log(`\n[Worker] Recalculating scores for ${allDates.size} unique date(s)…`);
+    for (const dateStr of Array.from(allDates).sort()) {
+      const d = new Date(`${dateStr}T00:00:00.000Z`);
+      const scores = await calculateScoresForDate(d);
+      console.log(`  [${dateStr}] ${scores.calculated} scores calculated`);
+    }
+  } else {
+    console.log('\n[Worker] No new dates — score recalculation skipped.');
   }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);

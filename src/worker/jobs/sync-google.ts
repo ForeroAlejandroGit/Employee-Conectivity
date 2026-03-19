@@ -1,6 +1,5 @@
 import { prisma } from '../../lib/prisma';
 import { syncGoogleMetricsForDateRange } from '../../lib/google-api';
-import { calculateScoresForDate } from '../../lib/score-calculator';
 
 export async function runGoogleSync() {
   const log = await prisma.syncLog.create({
@@ -19,15 +18,6 @@ export async function runGoogleSync() {
 
     if (result.errors.length > 0) {
       console.warn('[Google Sync] Errors:', result.errors);
-    }
-
-    // Calculate scores for every newly-fetched date
-    for (const dateStr of result.datesProcessed) {
-      const d = new Date(`${dateStr}T00:00:00.000Z`);
-      const scores = await calculateScoresForDate(d);
-      console.log(
-        `[Google Sync] Calculated ${scores.calculated} scores for ${dateStr}`,
-      );
     }
 
     await prisma.syncLog.update({

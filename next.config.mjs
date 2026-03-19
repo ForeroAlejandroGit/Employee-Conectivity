@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['googleapis', 'xlsx'],
-  },
+  serverExternalPackages: ['googleapis', 'xlsx'],
 };
 
 export default nextConfig;

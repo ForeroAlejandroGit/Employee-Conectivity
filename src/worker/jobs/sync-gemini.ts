@@ -1,6 +1,5 @@
 import { prisma } from '../../lib/prisma';
 import { syncGeminiActivity } from '../../lib/google-api';
-import { calculateScoresForDate } from '../../lib/score-calculator';
 
 /**
  * Syncs Gemini data from the Google Activity Reports API,
@@ -23,22 +22,6 @@ export async function runGeminiSync() {
 
     if (result.errors.length > 0) {
       console.warn('[Gemini Sync] Errors:', result.errors);
-    }
-
-    // Recalculate scores for every date that got new data
-    if (result.datesProcessed.length > 0) {
-      console.log(
-        `[Gemini Sync] Recalculating scores for ${result.datesProcessed.length} dates…`,
-      );
-
-      for (let i = 0; i < result.datesProcessed.length; i++) {
-        const dateStr = result.datesProcessed[i];
-        const d = new Date(`${dateStr}T00:00:00.000Z`);
-        const scores = await calculateScoresForDate(d);
-        console.log(
-          `  [${dateStr}] recalculated ${scores.calculated} scores  [${i + 1}/${result.datesProcessed.length}]`,
-        );
-      }
     }
 
     await prisma.syncLog.update({

@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import fs from 'fs';
 import path from 'path';
 import {
+  addDays,
   subDays,
   subMonths,
   startOfMonth,
@@ -39,6 +40,16 @@ function safeInt(value: string | number | undefined | null): number {
   if (value == null) return 0;
   const n = typeof value === 'number' ? value : parseInt(value, 10);
   return Number.isNaN(n) ? 0 : n;
+}
+
+/**
+ * Returns a dynamic skip threshold based on the number of active (non-excluded)
+ * employees. A date is considered already synced if at least 50% of active
+ * employees have data for it. Replaces the old hardcoded `> 10` check.
+ */
+async function getSkipThreshold(): Promise<number> {
+  const count = await prisma.employee.count({ where: { excluded: false } });
+  return Math.max(1, Math.floor(count * 0.5));
 }
 
 // ── Auth: User Usage Reports (email/drive/accounts) ─────
@@ -184,9 +195,10 @@ export async function syncGoogleMetricsForDateRange(fromDate?: Date): Promise<Sy
     errors: [],
   };
 
+  const skipThreshold = await getSkipThreshold();
   const dates = eachDayOfInterval({ start: windowStart, end: windowEnd });
   console.log(
-    `  Window: ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')} (${dates.length} days)`,
+    `  Window: ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')} (${dates.length} days, skip threshold: ${skipThreshold})`,
   );
 
   for (const target of dates) {
@@ -197,7 +209,7 @@ export async function syncGoogleMetricsForDateRange(fromDate?: Date): Promise<Sy
     const existing = await prisma.dailyMetric.count({
       where: { date: dateStart },
     });
-    if (existing > 10) continue;
+    if (existing >= skipThreshold) continue;
 
     try {
       console.log(`  [${dateStr}] fetching email/drive…`);
@@ -352,12 +364,42 @@ function groupEventsByDay(
  */
 export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> {
   const today = new Date();
-  const windowStart = fromDate ?? startOfMonth(subMonths(today, 2));
+  const hardWindowStart = fromDate ?? startOfMonth(subMonths(today, 2));
   const windowEnd = subDays(today, 3);
+
+  // Pre-filter: find the latest date already stored for chat AND meetings.
+  // Use the earlier of the two so we don't leave gaps in partial coverage.
+  const [latestChatRow, latestMeetRow] = await Promise.all([
+    prisma.dailyMetric.findFirst({
+      where: { chatMessagesSent: { gt: 0 } },
+      orderBy: { date: 'desc' },
+      select: { date: true },
+    }),
+    prisma.dailyMetric.findFirst({
+      where: { meetingCount: { gt: 0 } },
+      orderBy: { date: 'desc' },
+      select: { date: true },
+    }),
+  ]);
+
+  const latestDates = [latestChatRow?.date, latestMeetRow?.date].filter(Boolean) as Date[];
+  const latestStored = latestDates.length
+    ? latestDates.reduce((a, b) => (a < b ? a : b))
+    : null;
+
+  const windowStart = latestStored
+    ? new Date(Math.max(addDays(latestStored, 1).getTime(), hardWindowStart.getTime()))
+    : hardWindowStart;
+
+  if (windowStart > windowEnd) {
+    console.log('  [Chat/Meet] All dates up to date — nothing to fetch.');
+    return { datesProcessed: [], totalRecords: 0, errors: [] };
+  }
 
   const startTime = `${format(windowStart, 'yyyy-MM-dd')}T00:00:00.000Z`;
   const endTime = `${format(windowEnd, 'yyyy-MM-dd')}T23:59:59.000Z`;
 
+  const skipThreshold = await getSkipThreshold();
   const result: SyncResult = {
     datesProcessed: [],
     totalRecords: 0,
@@ -365,7 +407,7 @@ export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> 
   };
 
   console.log(
-    `  Window: ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')}`,
+    `  Window: ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')} (skip threshold: ${skipThreshold})`,
   );
 
   // ── 1. CHAT ───────────────────────────────────────────
@@ -400,7 +442,7 @@ export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> 
       const existing = await prisma.dailyMetric.count({
         where: { date: dateObj, chatMessagesSent: { gt: 0 } },
       });
-      if (existing > 10) {
+      if (existing >= skipThreshold) {
         console.log(
           `  [${dateStr}] chat already stored (${existing} records), skip  [${i + 1}/${chatDates.length}]`,
         );
@@ -474,7 +516,7 @@ export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> 
       const existing = await prisma.dailyMetric.count({
         where: { date: dateObj, meetingCount: { gt: 0 } },
       });
-      if (existing > 10) {
+      if (existing >= skipThreshold) {
         console.log(
           `  [${dateStr}] meet already stored (${existing} records), skip  [${i + 1}/${meetDates.length}]`,
         );
@@ -530,12 +572,29 @@ export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> 
  */
 export async function syncGeminiActivity(fromDate?: Date): Promise<SyncResult> {
   const today = new Date();
-  const windowStart = fromDate ?? startOfMonth(subMonths(today, 2));
+  const hardWindowStart = fromDate ?? startOfMonth(subMonths(today, 2));
   const windowEnd = subDays(today, 3);
+
+  // Pre-filter: find the latest date already stored for gemini.
+  const latestGeminiRow = await prisma.dailyMetric.findFirst({
+    where: { geminiEvents: { gt: 0 } },
+    orderBy: { date: 'desc' },
+    select: { date: true },
+  });
+
+  const windowStart = latestGeminiRow
+    ? new Date(Math.max(addDays(latestGeminiRow.date, 1).getTime(), hardWindowStart.getTime()))
+    : hardWindowStart;
+
+  if (windowStart > windowEnd) {
+    console.log('  [Gemini] All dates up to date — nothing to fetch.');
+    return { datesProcessed: [], totalRecords: 0, errors: [] };
+  }
 
   const startTime = `${format(windowStart, 'yyyy-MM-dd')}T00:00:00.000Z`;
   const endTime = `${format(windowEnd, 'yyyy-MM-dd')}T23:59:59.000Z`;
 
+  const skipThreshold = await getSkipThreshold();
   const result: SyncResult = {
     datesProcessed: [],
     totalRecords: 0,
@@ -543,7 +602,7 @@ export async function syncGeminiActivity(fromDate?: Date): Promise<SyncResult> {
   };
 
   console.log(
-    `  Window (Gemini): ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')}`,
+    `  Window (Gemini): ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')} (skip threshold: ${skipThreshold})`,
   );
 
   console.log(`\n  ── Fetching GEMINI activity reports ──`);
@@ -576,7 +635,7 @@ export async function syncGeminiActivity(fromDate?: Date): Promise<SyncResult> {
       const existing = await prisma.dailyMetric.count({
         where: { date: dateObj, geminiEvents: { gt: 0 } },
       });
-      if (existing > 10) {
+      if (existing >= skipThreshold) {
         console.log(
           `  [${dateStr}] gemini already stored (${existing} records), skip  [${i + 1}/${geminiDates.length}]`,
         );
