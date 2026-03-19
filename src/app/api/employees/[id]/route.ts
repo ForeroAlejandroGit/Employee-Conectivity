@@ -63,6 +63,7 @@ export async function GET(
         driveRate: Math.round((scores.filter((s) => s.driveActive > 0).length / scores.length) * 100),
         chatRate: Math.round((scores.filter((s) => s.chatActive > 0).length / scores.length) * 100),
         meetingsRate: Math.round((scores.filter((s) => s.meetingsActive > 0).length / scores.length) * 100),
+        geminiRate: Math.round((scores.filter((s) => s.geminiActive > 0).length / scores.length) * 100),
       });
     }
   }
@@ -82,12 +83,14 @@ export async function GET(
       driveActive: s.driveActive,
       chatActive: s.chatActive,
       meetingsActive: s.meetingsActive,
+      geminiActive: s.geminiActive,
       emailsSent: metric?.emailsSent ?? 0,
       filesEdited: metric?.filesEdited ?? 0,
       filesViewed: metric?.filesViewed ?? 0,
       filesCreated: metric?.filesCreated ?? 0,
       chatMessagesSent: metric?.chatMessagesSent ?? 0,
       meetingCount: metric?.meetingCount ?? 0,
+      geminiEvents: metric?.geminiEvents ?? 0,
     };
   });
 
@@ -123,6 +126,9 @@ export async function GET(
         : 0,
       meetingsRate: dailyScores.length
         ? Math.round((dailyScores.filter((s) => s.meetingsActive > 0).length / dailyScores.length) * 100)
+        : 0,
+      geminiRate: dailyScores.length
+        ? Math.round((dailyScores.filter((s) => s.geminiActive > 0).length / dailyScores.length) * 100)
         : 0,
     },
     daily,

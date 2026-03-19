@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { runHrSync } from './jobs/sync-hr';
 import { runGoogleSync } from './jobs/sync-google';
 import { runChatMeetingsSync } from './jobs/sync-chat-meetings';
+import { runGeminiSync } from './jobs/sync-gemini';
 
 /**
  * Worker process — runs independently from Next.js.
@@ -15,7 +16,8 @@ import { runChatMeetingsSync } from './jobs/sync-chat-meetings';
  *   1. HR Sync          — refresh the employee roster first
  *   2. Google Sync       — fetch email/drive metrics (User Usage Reports)
  *   3. Chat/Meet Sync   — fetch chat & meeting activity (Activity Reports)
- *   4. Score calculation — runs inside steps 2 & 3 per date
+ *   4. Gemini Sync      — fetch Gemini usage activity (Activity Reports)
+ *   5. Score calculation — runs inside steps 2, 3 & 4 per date
  */
 
 async function runFullPipeline() {
@@ -40,6 +42,12 @@ async function runFullPipeline() {
     await runChatMeetingsSync();
   } catch (e) {
     console.error('[Worker] Chat/Meet sync failed');
+  }
+
+  try {
+    await runGeminiSync();
+  } catch (e) {
+    console.error('[Worker] Gemini sync failed');
   }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);

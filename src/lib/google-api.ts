@@ -519,3 +519,105 @@ export async function syncChatAndMeetings(fromDate?: Date): Promise<SyncResult> 
   result.datesProcessed.sort();
   return result;
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  SECTION 3:  Gemini Usage Reports  (gemini_in_workspace_apps)
+//  Scope: admin.reports.audit.readonly
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Syncs Gemini Activity data from the Google Activity Reports API.
+ */
+export async function syncGeminiActivity(fromDate?: Date): Promise<SyncResult> {
+  const today = new Date();
+  const windowStart = fromDate ?? startOfMonth(subMonths(today, 2));
+  const windowEnd = subDays(today, 3);
+
+  const startTime = `${format(windowStart, 'yyyy-MM-dd')}T00:00:00.000Z`;
+  const endTime = `${format(windowEnd, 'yyyy-MM-dd')}T23:59:59.000Z`;
+
+  const result: SyncResult = {
+    datesProcessed: [],
+    totalRecords: 0,
+    errors: [],
+  };
+
+  console.log(
+    `  Window (Gemini): ${format(windowStart, 'yyyy-MM-dd')} → ${format(windowEnd, 'yyyy-MM-dd')}`,
+  );
+
+  console.log(`\n  ── Fetching GEMINI activity reports ──`);
+  const t0Gemini = Date.now();
+  let geminiEvents: ActivityEvent[] = [];
+
+  try {
+    geminiEvents = await fetchActivityReports('gemini_in_workspace_apps', startTime, endTime);
+    console.log(
+      `  ✓ ${geminiEvents.length} gemini events fetched in ${((Date.now() - t0Gemini) / 1000).toFixed(1)}s`,
+    );
+  } catch (error: any) {
+    const msg = `Gemini fetch failed: ${error.message}`;
+    console.error(`  ✗ ${msg}`);
+    result.errors.push(msg);
+  }
+
+  if (geminiEvents.length > 0) {
+    const geminiByDay = groupEventsByDay(geminiEvents);
+    const geminiDates = Array.from(geminiByDay.keys()).sort();
+    console.log(
+      `  ${geminiDates.length} days with gemini activity, storing…`,
+    );
+
+    for (let i = 0; i < geminiDates.length; i++) {
+      const dateStr = geminiDates[i];
+      const dateObj = new Date(`${dateStr}T00:00:00.000Z`);
+
+      // Skip if gemini data already stored for this date
+      const existing = await prisma.dailyMetric.count({
+        where: { date: dateObj, geminiEvents: { gt: 0 } },
+      });
+      if (existing > 10) {
+        console.log(
+          `  [${dateStr}] gemini already stored (${existing} records), skip  [${i + 1}/${geminiDates.length}]`,
+        );
+        continue;
+      }
+
+      const dayMap = geminiByDay.get(dateStr)!;
+      let matched = 0;
+
+      for (const [email, count] of Array.from(dayMap.entries())) {
+        const employee = await prisma.employee.findUnique({
+          where: { email },
+        });
+        if (!employee || employee.excluded) continue;
+
+        await prisma.dailyMetric.upsert({
+          where: {
+            employeeId_date: { employeeId: employee.id, date: dateObj },
+          },
+          create: {
+            employeeId: employee.id,
+            date: dateObj,
+            geminiEvents: count,
+          },
+          update: {
+            geminiEvents: count,
+          },
+        });
+        matched++;
+        result.totalRecords++;
+      }
+
+      console.log(
+        `  [${dateStr}] ✓ ${matched} gemini records stored  [${i + 1}/${geminiDates.length}]`,
+      );
+      if (!result.datesProcessed.includes(dateStr)) {
+        result.datesProcessed.push(dateStr);
+      }
+    }
+  }
+
+  result.datesProcessed.sort();
+  return result;
+}

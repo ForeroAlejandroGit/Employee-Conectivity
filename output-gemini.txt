@@ -1,0 +1,64 @@
+Fetching Gemini Workspace events from 2026-03-10T14:07:11.504Z to 2026-03-17T14:07:11.504Z...
+
+
+--- Testing applicationName: gemini_in_workspace_apps ---
+Found 10 events for gemini_in_workspace_apps. First event:
+{
+  "kind": "admin#reports#activity",
+  "id": {
+    "time": "2026-03-17T14:01:59.669Z",
+    "uniqueQualifier": "-4676390765075687359",
+    "applicationName": "gemini_in_workspace_apps",
+    "customerId": "C01qklrem"
+  },
+  "etag": "\"dIq1_3-rlzpHt33Y1wD3Rg6JAcnE8HHFJuxSzsJRd-o/A3XO3wE5T_UEIEdfIcurIwQKfHw\"",
+  "actor": {
+    "callerType": "USER",
+    "email": "astridsaenz@ingetec.com.co",
+    "profileId": "101928149113292792583"
+  },
+  "ipAddress": "186.154.39.61",
+  "networkInfo": {
+    "ipAsn": [
+      19429
+    ],
+    "regionCode": "CO",
+    "subdivisionCode": "CO-DC"
+  },
+  "events": [
+    {
+      "type": "ai_usage_event",
+      "name": "feature_utilization",
+      "parameters": [
+        {
+          "name": "app_name",
+          "value": "drive"
+        },
+        {
+          "name": "feature_source",
+          "value": "analyze_pdf"
+        },
+        {
+          "name": "action",
+          "value": "summarize_proactive_short"
+        },
+        {
+          "name": "event_category",
+          "value": "inactive"
+        }
+      ],
+      "resourceIds": [
+        "1_m890bEEnZFo8QX0IIvE2gZDMt0qN5Oz"
+      ]
+    }
+  ],
+  "resourceDetails": [
+    {
+      "id": "1_m890bEEnZFo8QX0IIvE2gZDMt0qN5Oz"
+    }
+  ]
+}
+
+
+--- Testing applicationName: gemini ---
+Failed to fetch gemini. Error: Invalid value at 'application_name' (type.googleapis.com/ccc.hosted.frontend.reports.v1.ReportsActivitiesListRequest.ApplicationName), "gemini"

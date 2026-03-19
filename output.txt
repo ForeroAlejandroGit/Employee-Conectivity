@@ -1,0 +1,221 @@
+Fetching all user parameters for date: 2026-03-14
+User: 07911-drummond@ingetec.com.co
+Available Parameters:
+accounts:admin_set_name
+accounts:creation_time
+accounts:disabled_reason
+accounts:domain_name
+accounts:drive_used_quota_in_mb
+accounts:first_name
+accounts:gmail_used_quota_in_mb
+accounts:gplus_photos_used_quota_in_mb
+accounts:is_2sv_enforced
+accounts:is_2sv_enrolled
+accounts:is_2sv_protected
+accounts:is_archived
+accounts:is_disabled
+accounts:is_less_secure_apps_access_allowed
+accounts:is_suspended
+accounts:last_login_time
+accounts:last_name
+accounts:last_sso_time
+accounts:num_authorized_apps
+accounts:num_passkeys_enrolled
+accounts:num_security_keys
+accounts:password_length_compliance
+accounts:password_strength
+accounts:total_quota_in_mb
+accounts:used_quota_in_mb
+accounts:used_quota_in_percentage
+accounts:user_has_overridden_name
+classroom:num_courses_created
+classroom:num_posts_created
+drive:num_google_documents_created
+drive:num_google_documents_edited
+drive:num_google_documents_trashed
+drive:num_google_documents_viewed
+drive:num_google_drawings_created
+drive:num_google_drawings_edited
+drive:num_google_drawings_trashed
+drive:num_google_drawings_viewed
+drive:num_google_forms_created
+drive:num_google_forms_edited
+drive:num_google_forms_trashed
+drive:num_google_forms_viewed
+drive:num_google_presentations_created
+drive:num_google_presentations_edited
+drive:num_google_presentations_trashed
+drive:num_google_presentations_viewed
+drive:num_google_sites_created
+drive:num_google_sites_edited
+drive:num_google_sites_trashed
+drive:num_google_sites_viewed
+drive:num_google_spreadsheets_created
+drive:num_google_spreadsheets_edited
+drive:num_google_spreadsheets_trashed
+drive:num_google_spreadsheets_viewed
+drive:num_google_videos_created
+drive:num_google_videos_edited
+drive:num_google_videos_trashed
+drive:num_google_videos_viewed
+drive:num_items_created
+drive:num_items_edited
+drive:num_items_trashed
+drive:num_items_viewed
+drive:num_other_types_created
+drive:num_other_types_edited
+drive:num_other_types_trashed
+drive:num_other_types_viewed
+drive:num_owned_external_items_added
+drive:num_owned_external_items_delta
+drive:num_owned_external_items_removed
+drive:num_owned_google_documents_added
+drive:num_owned_google_documents_created
+drive:num_owned_google_documents_delta
+drive:num_owned_google_documents_edited
+drive:num_owned_google_documents_removed
+drive:num_owned_google_documents_trashed
+drive:num_owned_google_documents_viewed
+drive:num_owned_google_drawings_added
+drive:num_owned_google_drawings_created
+drive:num_owned_google_drawings_delta
+drive:num_owned_google_drawings_edited
+drive:num_owned_google_drawings_removed
+drive:num_owned_google_drawings_trashed
+drive:num_owned_google_drawings_viewed
+drive:num_owned_google_forms_added
+drive:num_owned_google_forms_created
+drive:num_owned_google_forms_delta
+drive:num_owned_google_forms_edited
+drive:num_owned_google_forms_removed
+drive:num_owned_google_forms_trashed
+drive:num_owned_google_forms_viewed
+drive:num_owned_google_presentations_added
+drive:num_owned_google_presentations_created
+drive:num_owned_google_presentations_delta
+drive:num_owned_google_presentations_edited
+drive:num_owned_google_presentations_removed
+drive:num_owned_google_presentations_trashed
+drive:num_owned_google_presentations_viewed
+drive:num_owned_google_sites_added
+drive:num_owned_google_sites_created
+drive:num_owned_google_sites_delta
+drive:num_owned_google_sites_edited
+drive:num_owned_google_sites_removed
+drive:num_owned_google_sites_trashed
+drive:num_owned_google_sites_viewed
+drive:num_owned_google_spreadsheets_added
+drive:num_owned_google_spreadsheets_created
+drive:num_owned_google_spreadsheets_delta
+drive:num_owned_google_spreadsheets_edited
+drive:num_owned_google_spreadsheets_removed
+drive:num_owned_google_spreadsheets_trashed
+drive:num_owned_google_spreadsheets_viewed
+drive:num_owned_google_videos_added
+drive:num_owned_google_videos_created
+drive:num_owned_google_videos_delta
+drive:num_owned_google_videos_edited
+drive:num_owned_google_videos_removed
+drive:num_owned_google_videos_trashed
+drive:num_owned_google_videos_viewed
+drive:num_owned_internal_items_added
+drive:num_owned_internal_items_delta
+drive:num_owned_internal_items_removed
+drive:num_owned_items_added
+drive:num_owned_items_created
+drive:num_owned_items_delta
+drive:num_owned_items_edited
+drive:num_owned_items_removed
+drive:num_owned_items_trashed
+drive:num_owned_items_viewed
+drive:num_owned_items_with_visibility_anyone_in_domain_added
+drive:num_owned_items_with_visibility_anyone_in_domain_delta
+drive:num_owned_items_with_visibility_anyone_in_domain_removed
+drive:num_owned_items_with_visibility_anyone_in_domain_with_link_added
+drive:num_owned_items_with_visibility_anyone_in_domain_with_link_delta
+drive:num_owned_items_with_visibility_anyone_in_domain_with_link_removed
+drive:num_owned_items_with_visibility_anyone_with_link_added
+drive:num_owned_items_with_visibility_anyone_with_link_delta
+drive:num_owned_items_with_visibility_anyone_with_link_removed
+drive:num_owned_items_with_visibility_private_added
+drive:num_owned_items_with_visibility_private_delta
+drive:num_owned_items_with_visibility_private_removed
+drive:num_owned_items_with_visibility_public_added
+drive:num_owned_items_with_visibility_public_delta
+drive:num_owned_items_with_visibility_public_removed
+drive:num_owned_items_with_visibility_shared_externally_added
+drive:num_owned_items_with_visibility_shared_externally_delta
+drive:num_owned_items_with_visibility_shared_externally_removed
+drive:num_owned_items_with_visibility_shared_internally_added
+drive:num_owned_items_with_visibility_shared_internally_delta
+drive:num_owned_items_with_visibility_shared_internally_removed
+drive:num_owned_items_with_visibility_unknown_added
+drive:num_owned_items_with_visibility_unknown_delta
+drive:num_owned_items_with_visibility_unknown_removed
+drive:num_owned_other_types_added
+drive:num_owned_other_types_created
+drive:num_owned_other_types_delta
+drive:num_owned_other_types_edited
+drive:num_owned_other_types_removed
+drive:num_owned_other_types_trashed
+drive:num_owned_other_types_viewed
+gmail:is_gmail_enabled
+gmail:num_emails_exchanged
+gmail:num_emails_received
+gmail:num_emails_sent
+gmail:num_spam_emails_received
+
+Gemini/AI Parameters found: [
+  {
+    "name": "gmail:num_emails_sent",
+    "intValue": "0"
+  },
+  {
+    "name": "gmail:num_spam_emails_received",
+    "intValue": "0"
+  },
+  {
+    "name": "gmail:num_emails_received",
+    "intValue": "0"
+  },
+  {
+    "name": "gmail:is_gmail_enabled",
+    "boolValue": false
+  },
+  {
+    "name": "gmail:num_emails_exchanged",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_delta",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_added",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_removed",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_with_link_delta",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_with_link_added",
+    "intValue": "0"
+  },
+  {
+    "name": "drive:num_owned_items_with_visibility_anyone_in_domain_with_link_removed",
+    "intValue": "0"
+  },
+  {
+    "name": "accounts:domain_name",
+    "stringValue": "ingetec.com.co"
+  },
+  {
+    "name": "accounts:gmail_used_quota_in_mb",
+    "intValue": "0"
+  }
+]

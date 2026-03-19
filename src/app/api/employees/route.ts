@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getDateRange } from '@/lib/date-utils';
 
@@ -76,6 +76,7 @@ export async function GET(request: Request) {
           driveActive: true,
           chatActive: true,
           meetingsActive: true,
+          geminiActive: true,
           date: true,
         },
         orderBy: { date: 'desc' },
@@ -122,6 +123,12 @@ export async function GET(request: Request) {
         ? Math.round(
             (scores.filter((s) => s.meetingsActive > 0).length /
               scores.length) *
+              100,
+          )
+        : 0,
+      geminiRate: scores.length
+        ? Math.round(
+            (scores.filter((s) => s.geminiActive > 0).length / scores.length) *
               100,
           )
         : 0,

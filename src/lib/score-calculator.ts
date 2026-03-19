@@ -55,6 +55,7 @@ export async function calculateScoresForDate(
           : 0;
       const chatActive = metric.chatMessagesSent > 0 ? 1 : 0;
       const meetingsActive = metric.meetingCount > 0 ? 1 : 0;
+      const geminiActive = metric.geminiEvents > 0 ? 1 : 0;
 
       // Weighted sum, capped at 1.0
       const totalScore = Math.min(
@@ -66,7 +67,8 @@ export async function calculateScoresForDate(
           driveActive * coeff.driveLastUse +
           driveActive * coeff.filesCreated +
           chatActive * coeff.chatWeight +
-          meetingsActive * coeff.meetingsWeight,
+          meetingsActive * coeff.meetingsWeight +
+          geminiActive * coeff.geminiWeight,
       );
 
       await prisma.dailyScore.upsert({
@@ -80,6 +82,7 @@ export async function calculateScoresForDate(
           driveActive,
           chatActive,
           meetingsActive,
+          geminiActive,
           totalScore,
           coefficientSet: coeff.name,
         },
@@ -88,6 +91,7 @@ export async function calculateScoresForDate(
           driveActive,
           chatActive,
           meetingsActive,
+          geminiActive,
           totalScore,
           coefficientSet: coeff.name,
         },

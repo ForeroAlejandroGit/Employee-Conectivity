@@ -17,6 +17,7 @@ export const COEFFICIENT_SETS = {
     filesCreated: 0.05,
     chatWeight: 0.03,
     meetingsWeight: 0.25,
+    geminiWeight: 0.1,
   },
   others: {
     name: 'others',
@@ -28,6 +29,7 @@ export const COEFFICIENT_SETS = {
     filesCreated: 0.10,
     chatWeight: 0.10,
     meetingsWeight: 0.28,
+    geminiWeight: 0.1,
   },
 } as const;
 

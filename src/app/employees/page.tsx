@@ -26,6 +26,7 @@ interface EmpRow {
   driveRate: number;
   chatRate: number;
   meetingsRate: number;
+  geminiRate: number;
   daysTracked: number;
 }
 
@@ -110,12 +111,12 @@ export default function EmployeesPage() {
     const data = await res.json();
     const rows: EmpRow[] = data.employees;
     const header =
-      'Name,Last Name,Email,Department,Division,Score,Email%,Drive%,Chat%,Meetings%';
+      'Name,Last Name,Email,Department,Division,Score,Email%,Drive%,Chat%,Meetings%,Gemini%';
     const csv = [
       header,
       ...rows.map(
         (r) =>
-          `"${r.name}","${r.lastName}","${r.email}","${r.department}","${r.division}",${r.avgScore},${r.emailRate},${r.driveRate},${r.chatRate},${r.meetingsRate}`,
+          `"${r.name}","${r.lastName}","${r.email}","${r.department}","${r.division}",${r.avgScore},${r.emailRate},${r.driveRate},${r.chatRate},${r.meetingsRate},${r.geminiRate}`,
       ),
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -248,6 +249,9 @@ export default function EmployeesPage() {
                     Meetings
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
+                    ✦ Gemini
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">
                     Days
                   </th>
                 </tr>
@@ -295,6 +299,9 @@ export default function EmployeesPage() {
                     </td>
                     <td className="px-4 py-3 text-right text-sm text-gray-600">
                       {emp.meetingsRate}%
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm font-medium text-purple-600">
+                      {emp.geminiRate}%
                     </td>
                     <td className="px-4 py-3 text-right text-sm text-gray-400">
                       {emp.daysTracked}

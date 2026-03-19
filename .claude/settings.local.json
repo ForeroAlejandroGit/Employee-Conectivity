@@ -1,22 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd /c/Code/'Employees Connectivity')",
-      "WebFetch(domain:gestiona.ingetec.com.co)",
-      "Bash(npm install)",
-      "Bash(npx prisma migrate dev --name init --skip-generate)",
-      "Bash(npx prisma generate)",
-      "Bash(npx prisma db seed)",
-      "Bash(npx next build)",
-      "Bash(npm install xlsx)",
-      "Bash(npx tsc --noEmit src/worker/index.ts)",
-      "Bash(python3 -c \":*)",
-      "Bash(node -e \":*)",
-      "Bash(node --version)",
-      "Bash(printf \"hello world\\\\n''single quotes''\\\\n\")",
-      "Bash(printf '%s\\\\n' \"const fs = require\\(''fs''\\);\" \"const path = require\\(''path''\\);\" \"const base = ''C:/Code/Employees Connectivity'';\" \"console.log\\(''Node script running, base:'', base\\);\" \"console.log\\(''exists:'', fs.existsSync\\(base\\)\\);\")",
-      "Bash(node /tmp/writer.js)",
-      "Bash(node -e \"process.stdout.write\\(Buffer.from\\(require\\(''fs''\\).readFileSync\\(''/dev/stdin''\\).toString\\(\\).trim\\(\\), ''base64''\\).toString\\(\\)\\)\")"
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "source /c/ProgramData/anaconda3/etc/profile.d/conda.sh && conda activate ds-starter 2>/dev/null || true",
+            "statusMessage": "Activating ds-starter conda environment..."
+          }
+        ]
+      }
     ]
   }
 }
